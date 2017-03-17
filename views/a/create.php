@@ -1,5 +1,5 @@
 <? $this->title = 'Создать';?>
 
-<?= $this->render('_menu', ['type' => $type, 'model' => $model]) ?>
+<?= $this->render('_menu', ['current_model' => $current_model]) ?>
 
-<?= $this->render('_form/'.$type, ['model' => $model, 'type' => $type]) ?>
+<?= $this->render('_form/'.$current_model::ALIAS, ['current_model' => $current_model]) ?>

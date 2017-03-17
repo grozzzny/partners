@@ -9,6 +9,8 @@ class Partners extends Base
     const TITLE = 'Партнеры';
     const ALIAS = 'partners';
 
+    const SUBMENU_PHOTOS = true;
+
     public static function tableName()
     {
         return 'gr_partners';
@@ -19,9 +21,10 @@ class Partners extends Base
         return [
             ['id', 'number', 'integerOnly' => true],
             [['name','link'], 'string'],
-            ['icon', 'image'],
+            ['logo', 'image'],
             ['order_num', 'integer'],
             ['status', 'default', 'value' => self::STATUS_ON],
+            ['name', 'required'],
         ];
     }
 
@@ -40,7 +43,7 @@ class Partners extends Base
     public static function queryFilter(&$query, $get)
     {
         if(!empty($get['name'])){
-            $query->andFilterWhere(['name' => $get['name']]);
+            $query->andFilterWhere(['LIKE', 'name', $get['name']]);
         }
     }
 

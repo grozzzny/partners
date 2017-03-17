@@ -4,8 +4,10 @@ namespace grozzzny\partners\controllers;
 use grozzzny\partners\models\Base;
 use Yii;
 use yii\data\ActiveDataProvider;
-use grozzzny\partners\models\Partners;
+use yii\easyii\behaviors\SortableController;
+use yii\easyii\helpers\Image;
 use yii\helpers\Url;
+use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
 
 use yii\easyii\components\Controller;
@@ -13,27 +15,34 @@ use yii\easyii\components\Controller;
 
 class AController extends Controller
 {
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => SortableController::className(),
+                'model' => Base::getModel(Yii::$app->request->get('alias'))
+            ],
+        ];
+    }
+
+
     /**
-     * Список
+     * @param null $alias
      * @return string
      */
-    public function actionIndex($model = null)
+    public function actionIndex($alias = null)
     {
-        $models = Base::allModels();
+        $current_model = Base::getModel($alias);
 
-        $current_model = empty($model) ? current($models) : $models[$model];
-
-        $query = $current_model->find()->desc();
+        $query = $current_model->find()->sort();
 
         $data = new ActiveDataProvider(['query' => $query]);
 
         $current_model::queryFilter($query, Yii::$app->request->get());
 
-        Url::remember();
-
         return $this->render('index', [
             'data' => $data,
-            'models' => $models,
             'current_model' => $current_model
         ]);
     }
@@ -41,36 +50,35 @@ class AController extends Controller
 
     /**
      * Создать
-     * @param $type
+     * @param $alias
      * @return array|string|\yii\web\Response
      */
-    public function actionCreate($type)
+    public function actionCreate($alias)
     {
-        $modelClass = DraftProfileBase::getModel($type);
-        $model = new $modelClass;
+        $current_model = Base::getModel($alias);
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($current_model->load(Yii::$app->request->post())) {
             if(Yii::$app->request->isAjax){
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ActiveForm::validate($model);
+                return ActiveForm::validate($current_model);
             }
             else{
                 if(isset($_FILES)){
-                    foreach ($model->getAttributes() as $attribute => $value){
-                        if(in_array($attribute, DraftProfileBase::getAttributesImage())) {
-                            $model->$attribute = UploadedFile::getInstance($model, $attribute);
-                            if ($model->$attribute && $model->validate([$attribute])) {
-                                $model->$attribute = Image::upload($model->$attribute, 'draft_profile');
+                    foreach ($current_model->getAttributes() as $attribute => $value){
+                        if(in_array($attribute, Base::getAttributesImage())) {
+                            $current_model->$attribute = UploadedFile::getInstance($current_model, $attribute);
+                            if ($current_model->$attribute && $current_model->validate([$attribute])) {
+                                $current_model->$attribute = Image::upload($current_model->$attribute, $current_model::ALIAS);
                             } else {
-                                $model->$attribute = '';
+                                $current_model->$attribute = '';
                             }
                         }
                     }
                 }
 
-                if($model->save()){
+                if($current_model->save()){
                     $this->flash('success', 'Запись создана');
-                    return $this->redirect(Url::previous());
+                    return $this->redirect(['/admin/'.$this->module->id]);
                 }
                 else{
                     $this->flash('error', 'Ошибка');
@@ -80,8 +88,7 @@ class AController extends Controller
         }
         else {
             return $this->render('create', [
-                'model' => $model,
-                'type' => $type
+                'current_model' => $current_model
             ]);
         }
     }
@@ -89,88 +96,83 @@ class AController extends Controller
 
     /**
      * Редактировать
-     * @param $type
      * @param $id
-     * @param null $title
      * @return array|string|\yii\web\Response
      */
-    public function actionEdit($type, $id, $title = null)
+    public function actionEdit($alias, $id)
     {
-        $modelClass = DraftProfileBase::getModel($type);
+        $current_model = Base::getModel($alias);
 
-        $model = $modelClass::findOne($id);
+        $current_model = $current_model::findOne($id);
 
-        if($model === null){
+        if($current_model === null){
             $this->flash('error', Yii::t('easyii', 'Not found'));
             return $this->redirect(['/admin/'.$this->module->id]);
         }
-        if ($model->load(Yii::$app->request->post())) {
+        if ($current_model->load(Yii::$app->request->post())) {
             if(Yii::$app->request->isAjax){
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ActiveForm::validate($model);
+                return ActiveForm::validate($current_model);
             }
             else{
                 if(isset($_FILES)){
-                    foreach ($model->getAttributes() as $attribute => $value){
-                        if(in_array($attribute, DraftProfileBase::getAttributesImage())) {
-                            $model->$attribute = UploadedFile::getInstance($model, $attribute);
-                            if($model->$attribute && $model->validate([$attribute])){
-                                $model->$attribute = Image::upload($model->$attribute, 'draft_profile');
+                    foreach ($current_model->getAttributes() as $attribute => $value){
+                        if(in_array($attribute, Base::getAttributesImage())) {
+                            $current_model->$attribute = UploadedFile::getInstance($current_model, $attribute);
+                            if($current_model->$attribute && $current_model->validate([$attribute])){
+                                $current_model->$attribute = Image::upload($current_model->$attribute, $current_model::ALIAS);
                             }
                             else{
-                                $model->$attribute = $model->oldAttributes[$attribute];
+                                $current_model->$attribute = $current_model->oldAttributes[$attribute];
                             }
                         }
                     }
                 }
 
-                if($model->save()){
+                if($current_model->save()){
                     $this->flash('success', 'Запись отредактирована');
                 }
                 else{
-                    $this->flash('error', Yii::t('easyii', 'Update error. {0}', $model->formatErrors()));
+                    $this->flash('error', Yii::t('easyii', 'Update error. {0}', $current_model->formatErrors()));
                 }
                 return $this->refresh();
             }
         }
         else {
             return $this->render('edit', [
-                'model' => $model,
-                'type' => $type,
-                'title' => $title
+                'current_model' => $current_model
             ]);
         }
     }
 
 
-    public function actionPhotos($type, $id)
+    public function actionPhotos($alias, $id)
     {
-        $modelClass = DraftProfileBase::getModel($type);
+        $current_model = Base::getModel($alias);
 
-        $model = $modelClass::findOne($id);
+        $current_model = $current_model::findOne($id);
 
-        if(!($model)){
+        if(!($current_model)){
             return $this->redirect(['/admin/'.$this->module->id]);
         }
 
         return $this->render('photos', [
-            'model' => $model,
-            'type' => $type
+            'current_model' => $current_model,
         ]);
     }
 
     /**
      * Удалить
-     * @param $type
+     * @param $alias
      * @param $id
      * @return mixed
      */
-    public function actionDelete($type, $id)
+    public function actionDelete($alias, $id)
     {
-        $modelClass = DraftProfileBase::getModel($type);
+        $current_model = Base::getModel($alias);
 
-        if(($model = $modelClass::findOne($id))){
-            $model->delete();
+        if(($current_model = $current_model::findOne($id))){
+            $current_model->delete();
         } else {
             $this->error =  Yii::t('easyii', 'Not found');
         }
@@ -181,27 +183,27 @@ class AController extends Controller
     /**
      * Удалить изображение
      * @param $attribute
-     * @param $type
+     * @param $alias
      * @param $id
      * @return \yii\web\Response
      */
-    public function actionClearImage($attribute, $type, $id)
+    public function actionClearImage($attribute, $alias, $id)
     {
-        $modelClass = DraftProfileBase::getModel($type);
+        $current_model = Base::getModel($alias);
 
-        $model = $modelClass::findOne($id);
+        $current_model = $current_model::findOne($id);
 
-        if($model === null){
+        if($current_model === null){
             $this->flash('error', Yii::t('easyii', 'Not found'));
         }
         else{
-            $url_img = $model->$attribute;
-            $model->$attribute = '';
-            if($model->update()){
+            $url_img = $current_model->$attribute;
+            $current_model->$attribute = '';
+            if($current_model->update()){
                 @unlink(Yii::getAlias('@webroot').$url_img);
                 $this->flash('success', Yii::t('easyii', 'Image cleared'));
             } else {
-                $this->flash('error', Yii::t('easyii', 'Update error. {0}', $model->formatErrors()));
+                $this->flash('error', Yii::t('easyii', 'Update error. {0}', $current_model->formatErrors()));
             }
         }
         return $this->back();
@@ -209,45 +211,56 @@ class AController extends Controller
 
     /**
      * Активировать
-     * @param $type
+     * @param $alias
      * @param $id
      * @return mixed
      */
-    public function actionOn($type, $id)
+    public function actionOn($alias, $id)
     {
-        return $this->changeStatus($type, $id, DraftProfileBase::STATUS_ON);
+        return $this->changeStatus($alias, $id, Base::STATUS_ON);
     }
 
 
     /**
      * Деактивировать
-     * @param $type
+     * @param $alias
      * @param $id
      * @return mixed
      */
-    public function actionOff($type, $id)
+    public function actionOff($alias, $id)
     {
-        return $this->changeStatus($type, $id, DraftProfileBase::STATUS_OFF);
+        return $this->changeStatus($alias, $id, Base::STATUS_OFF);
     }
 
     /**
      * Изменить статус
-     * @param $type
+     * @param $alias
      * @param $id
      * @param $status
      * @return mixed
      */
-    public function changeStatus($type, $id, $status)
+    public function changeStatus($alias, $id, $status)
     {
-        $modelClass = DraftProfileBase::getModel($type);
+        $current_model = Base::getModel($alias);
 
-        if($model = $modelClass::findOne($id)){
-            $model->status = $status;
-            $model->update();
+        if($current_model = $current_model::findOne($id)){
+            $current_model->status = $status;
+            $current_model->update();
         }else{
             $this->error = Yii::t('easyii', 'Not found');
         }
 
         return $this->formatResponse(Yii::t('easyii', 'Status successfully changed'));
+    }
+
+
+    public function actionUp($id)
+    {
+        return $this->move($id, 'up');
+    }
+
+    public function actionDown($id)
+    {
+        return $this->move($id, 'down');
     }
 }

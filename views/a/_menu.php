@@ -8,10 +8,10 @@ $action = $this->context->action->id;
 $module = $this->context->module->id;
 
 $items = [];
-foreach ($models as $model){
+foreach ($current_model->models as $model){
     $items[] = [
         'label' => $model::TITLE,
-        'url' => ['a/', 'model' => $model::className()],
+        'url' => ['a/', 'alias' => $model::ALIAS],
         'active' => $model::ALIAS == $current_model::ALIAS,
     ];
 }
@@ -28,8 +28,8 @@ foreach ($models as $model){
 <ul class="nav nav-pills">
 
     <li <?= ($action === 'index') ? 'class="active"' : '' ?>>
-        <a href="<?= $this->context->getReturnUrl(['/admin/'.$module, 'model' => $current_model::className()]) ?>">
-            <?php if($action === 'edit') : ?>
+        <a href="<?= Url::to(['/admin/'.$module, 'alias' => $current_model::ALIAS]) ?>">
+            <?php if($action != 'index') : ?>
                 <i class="glyphicon glyphicon-chevron-left font-12"></i>
             <?php endif; ?>
             <?= Yii::t('easyii', 'List') ?>
@@ -38,7 +38,7 @@ foreach ($models as $model){
     <li <?= ($action === 'create') ? 'class="active"' : '' ?>>
         <a href="<?= Url::to([
         '/admin/'.$module.'/a/create',
-        'model' => $current_model::className()
+        'alias' => $current_model::ALIAS
         ]) ?>">
             <?= Yii::t('easyii', 'Create') ?>
         </a>

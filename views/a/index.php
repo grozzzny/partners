@@ -1,13 +1,15 @@
 <?php
 use yii\bootstrap\BootstrapPluginAsset;
+use grozzzny\partners\assets\ModuleAsset;
 
 BootstrapPluginAsset::register($this);
+ModuleAsset::register($this);
 
 $this->title = $current_model::TITLE;
 
 ?>
 
-<?= $this->render('_menu', ['models' => $models, 'current_model' => $current_model]) ?>
+<?= $this->render('_menu', ['current_model' => $current_model]) ?>
 
 <? if($data->count > 0) : ?>
 

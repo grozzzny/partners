@@ -12,7 +12,7 @@ class m170316_221119_partners extends Migration
             'id' => Schema::TYPE_PK,
             'name' => Schema::TYPE_STRING,
             'link' => Schema::TYPE_STRING,
-            'icon' => Schema::TYPE_STRING,
+            'logo' => Schema::TYPE_STRING,
             'status' => Schema::TYPE_BOOLEAN . " DEFAULT '1'",
             'order_num' => Schema::TYPE_INTEGER,
         ], $this->tableOptions);
