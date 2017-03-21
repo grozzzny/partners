@@ -9,7 +9,7 @@ class Partners extends Base
     const TITLE = 'Партнеры';
     const ALIAS = 'partners';
 
-    const SUBMENU_PHOTOS = true;
+    const SUBMENU_PHOTOS = false;
 
     public static function tableName()
     {
