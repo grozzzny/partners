@@ -18,7 +18,7 @@ class Base extends \yii\easyii\components\ActiveRecord
         ];
     }
 
-    public function getModels()
+    public static function getModels()
     {
         return [
             Partners::ALIAS => Yii::createObject(Partners::className())
