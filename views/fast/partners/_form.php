@@ -2,7 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
-use yii\easyii\helpers\Image;
+use yii\easyii2\helpers\Image;
 
 $module = $this->context->module->id;
 ?>

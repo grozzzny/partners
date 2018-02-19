@@ -1,14 +1,33 @@
 <?php
 namespace grozzzny\partners;
 
-class PartnersModule extends \yii\easyii\components\Module
+use Yii;
+use yii\easyii2\components\FastModule;
+
+class PartnersModule extends FastModule
 {
-    public static $installConfig = [
-        'title' => [
-            'en' => 'Text blocks',
-            'ru' => 'Текстовые блоки',
-        ],
-        'icon' => 'font',
-        'order_num' => 20,
+    public $settings = [
+        'modelPartners' => '\grozzzny\partners\models\Partners',
     ];
+
+    public $title = 'Partners';
+    public $icon = 'file';
+
+    public function getTitle()
+    {
+        // TODO: Implement getTitle() method.
+        return Yii::t('app', $this->title);
+    }
+
+    public function getName()
+    {
+        // TODO: Implement getName() method.
+        return $this->id;
+    }
+
+    public function getIcon()
+    {
+        // TODO: Implement getIcon() method.
+        return $this->icon;
+    }
 }

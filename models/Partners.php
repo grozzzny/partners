@@ -2,14 +2,29 @@
 namespace grozzzny\partners\models;
 
 
-class Partners extends Base
+use Yii;
+use yii\data\BaseDataProvider;
+use yii\easyii2\components\ActiveQuery;
+use yii\easyii2\components\FastModel;
+use yii\easyii2\components\FastModelInterface;
+
+/**
+ * Class Partners
+ * @package grozzzny\partners\models
+ *
+ * @property int $id [int(11)]
+ * @property string $name [varchar(255)]
+ * @property string $link [varchar(255)]
+ * @property string $logo [varchar(255)]
+ * @property bool $status [tinyint(1)]
+ * @property int $order_num [int(11)]
+ */
+class Partners extends FastModel implements FastModelInterface
 {
-    const CACHE_KEY = 'gr_partners';
+    const PRIMARY_MODEL = true;
 
-    const TITLE = 'Партнеры';
-    const ALIAS = 'partners';
-
-    const SUBMENU_PHOTOS = false;
+    const CACHE_KEY = 'partners';
+    const ORDER_NUM = false;
 
     public static function tableName()
     {
@@ -40,11 +55,38 @@ class Partners extends Base
         ];
     }
 
-    public static function queryFilter(&$query, $get)
+    public static function getNameModel()
     {
-        if(!empty($get['name'])){
-            $query->andFilterWhere(['LIKE', 'name', $get['name']]);
+        // TODO: Implement getNameModel() method.
+        return Yii::t('app', 'Partners');
+    }
+
+    public static function getSlugModel()
+    {
+        // TODO: Implement getNameModel() method.
+        return 'partners';
+    }
+
+
+    public static function queryFilter(ActiveQuery &$query, $get)
+    {
+        if(!empty($get['text'])){
+            $query->andFilterWhere(['LIKE', 'name', $get['text']]);
         }
+    }
+
+    public static function querySort(BaseDataProvider &$provider)
+    {
+        $provider->setSort([
+            'defaultOrder' => [
+                'id' => SORT_DESC
+            ],
+            'attributes' => [
+                'id',
+                'name',
+                'status',
+            ]
+        ]);
     }
 
 }
