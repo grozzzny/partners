@@ -47,18 +47,18 @@ class Partners extends FastModel implements FastModelInterface
     {
         return [
             'id' => 'ID',
-            'name' => 'Наименование',
-            'link' => 'Ссылка',
-            'logo' => 'Логотип',
-            'status' => 'Активно',
-            'order_num' => 'Индекс сортировки'
+            'name' => Yii::t('app/partners', 'Name'),
+            'link' => Yii::t('app/partners', 'Link'),
+            'logo' => Yii::t('app/partners', 'Logo'),
+            'status' => Yii::t('app/partners', 'Status'),
+            'order_num' => Yii::t('app/partners', 'Index sort')
         ];
     }
 
     public static function getNameModel()
     {
         // TODO: Implement getNameModel() method.
-        return Yii::t('app', 'Partners');
+        return Yii::t('app/partners', 'Partners');
     }
 
     public static function getSlugModel()

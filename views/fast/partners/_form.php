@@ -1,8 +1,14 @@
 <?php
+use grozzzny\widgets\switch_checkbox\SwitchCheckbox;
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 use yii\easyii2\helpers\Image;
+/**
+ * @var View $this
+ * @var \grozzzny\partners\models\Partners $model
+ */
 
 $module = $this->context->module->id;
 ?>
@@ -13,25 +19,18 @@ $module = $this->context->module->id;
 ]); ?>
 
 
-<?php if($current_model->logo) : ?>
-<div class="form-group">
-    <img src="<?= Image::thumb($current_model->logo, 240) ?>">
-</div>
-<div class="form-group">
-    <a href="<?= Url::to([
-        '/admin/'.$module.'/a/clear-image',
-        'id' => $current_model->id,
-        'alias' => $current_model::ALIAS,
-        'attribute' => 'logo'
-    ]) ?>" class="text-danger confirm-delete" title="<?= Yii::t('easyii', 'Clear image')?>"><?= Yii::t('easyii', 'Clear image')?></a>
-</div>
-<?php endif; ?>
-<?= $form->field($current_model, 'logo')->fileInput() ?>
+<?= $this->render('@easyii2/views/fast/_image_file', ['model' => $model, 'attribute' => 'logo'])?>
+<?= $form->field($model, 'logo')->fileInput() ?>
 
-<?= $form->field($current_model, 'name') ?>
-<?= $form->field($current_model, 'link') ?>
+<?= $form->field($model, 'name') ?>
+<?= $form->field($model, 'link') ?>
 
-<div class="checkbox"><label><?=Html::activeCheckbox($current_model, 'status', ['uncheck' => 0]) ?></label></div>
+<?=SwitchCheckbox::widget([
+    'model' => $model,
+    'attributes' => [
+        'status'
+    ]
+])?>
 
-<?= Html::submitButton(Yii::t('easyii', 'Save'), ['class' => 'btn btn-primary']) ?>
+<?= Html::submitButton(Yii::t('easyii2', 'Save'), ['class' => 'btn btn-primary']) ?>
 <?php ActiveForm::end(); ?>
